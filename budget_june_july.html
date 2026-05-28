@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget — June & July</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1612;
+    --ink-soft: #4A3F35;
+    --ink-muted: #8A7E74;
+    --june: #C84B31;
+    --july: #2D6A4F;
+    --gold: #D4A843;
+    --line: rgba(26,22,18,0.12);
+    --card-bg: #FDFAF5;
+  }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .divider-line {
+    width: 60px;
+    height: 1px;
+    background: var(--ink);
+    margin: 20px auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto 40px;
+  }
+
+  @media (max-width: 680px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .month-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .month-card:nth-child(2) { animation-delay: 0.1s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .june .card-header::after { background: var(--june); }
+  .july .card-header::after { background: var(--july); }
+
+  .month-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .june .month-eyebrow { color: var(--june); }
+  .july .month-eyebrow { color: var(--july); }
+
+  .month-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .month-desc {
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .income-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px;
+    background: var(--ink);
+    color: var(--cream);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .income-strip .amount {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .section {
+    padding: 18px 28px 0;
+  }
+
+  .section:last-of-type { padding-bottom: 24px; }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .line-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+    border-bottom: 1px dotted rgba(26,22,18,0.07);
+    transition: color 0.15s;
+  }
+
+  .line-item:last-child { border-bottom: none; }
+  .line-item:hover { color: var(--ink); }
+
+  .line-item .amt { 
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+
+  .line-item.zero .amt { color: var(--ink-muted); }
+  .line-item.zero { opacity: 0.5; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px;
+    margin-top: 2px;
+    border-top: 1px solid var(--line);
+    background: rgba(26,22,18,0.03);
+  }
+
+  .total-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .total-amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  .june .total-amount { color: var(--june); }
+  .july .total-amount { color: var(--july); }
+
+  /* Waterfall bar */
+  .waterfall {
+    max-width: 960px;
+    margin: 0 auto 40px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 28px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .waterfall-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+  }
+
+  .wf-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .wf-label {
+    font-size: 11px;
+    color: var(--ink-soft);
+    min-width: 160px;
+    letter-spacing: 0.03em;
+  }
+
+  .wf-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: rgba(26,22,18,0.06);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .wf-bar {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 1s cubic-bezier(0.16,1,0.3,1);
+    width: 0;
+  }
+
+  .wf-amt {
+    font-size: 11px;
+    font-weight: 500;
+    min-width: 64px;
+    text-align: right;
+    color: var(--ink);
+  }
+
+  /* Savings timeline */
+  .timeline-card {
+    max-width: 960px;
+    margin: 0 auto 40px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 28px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .timeline-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 24px;
+  }
+
+  .tl-track {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .tl-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 100px;
+    position: relative;
+  }
+
+  .tl-node:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 100%;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .tl-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: var(--cream);
+    z-index: 1;
+    margin-bottom: 10px;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tl-dot.done { background: var(--july); border-color: var(--july); }
+  .tl-dot.current { background: var(--june); border-color: var(--june); }
+
+  .tl-month {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .tl-ef {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--july);
+    text-align: center;
+    margin-bottom: 2px;
+  }
+
+  .tl-hysa {
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-align: center;
+  }
+
+  /* Footer note */
+  .footnote {
+    max-width: 960px;
+    margin: 0 auto;
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+    line-height: 1.7;
+    text-align: center;
+    padding: 20px 0 40px;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <p class="page-subtitle">Monthly Budget Plan</p>
+  <div class="divider-line"></div>
+  <h1 class="page-title">June & July</h1>
+  <div class="divider-line"></div>
+  <p class="page-subtitle">Net income $7,149.46 · Semi-monthly paychecks of $3,574.73</p>
+</div>
+
+<!-- Two month cards -->
+<div class="grid">
+
+  <!-- JUNE -->
+  <div class="month-card june">
+    <div class="card-header">
+      <div class="month-eyebrow">Recovery month</div>
+      <div class="month-name">June</div>
+      <div class="month-desc">Emergency fund rebuild · HYSA paused</div>
+    </div>
+    <div class="income-strip">
+      <span>Monthly net</span>
+      <span class="amount">$7,149.46</span>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Fixed expenses</div>
+      <div class="line-item"><span>Rent</span><span class="amt">−$2,773.00</span></div>
+      <div class="line-item"><span>Water / sewer / trash</span><span class="amt">−$40.00</span></div>
+      <div class="line-item"><span>Internet</span><span class="amt">−$35.00</span></div>
+      <div class="line-item"><span>Renters insurance</span><span class="amt">−$7.26</span></div>
+      <div class="line-item"><span>Electricity (est.)</span><span class="amt">−$36.00</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Savings & investments</div>
+      <div class="line-item"><span>Emergency fund (replenish)</span><span class="amt">−$2,000.00</span></div>
+      <div class="line-item zero"><span>HYSA</span><span class="amt">$0 — paused</span></div>
+      <div class="line-item"><span>Roth IRA</span><span class="amt">−$625.00</span></div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">CC budget left</span>
+      <span class="total-amount">$1,624.20</span>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Essentials (on card)</div>
+      <div class="line-item"><span>Groceries + supplies</span><span class="amt">−$500.00</span></div>
+      <div class="line-item"><span>Gas</span><span class="amt">−$110.00</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Subscriptions (on card)</div>
+      <div class="line-item"><span>Climbing Gym</span><span class="amt">−$121.00</span></div>
+      <div class="line-item"><span>Claude</span><span class="amt">−$22.10</span></div>
+      <div class="line-item"><span>YouTube Music</span><span class="amt">−$20.98</span></div>
+      <div class="line-item"><span>Walmart+</span><span class="amt">−$12.95</span></div>
+      <div class="line-item"><span>Forfeit</span><span class="amt">−$10.99</span></div>
+      <div class="line-item"><span>iCloud</span><span class="amt">−$9.99</span></div>
+      <div class="line-item"><span>Amazon Prime</span><span class="amt">−$7.49</span></div>
+      <div class="line-item"><span>Bunpro</span><span class="amt">−$5.00</span></div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">True discretionary</span>
+      <span class="total-amount">$812.70</span>
+    </div>
+  </div>
+
+  <!-- JULY -->
+  <div class="month-card july">
+    <div class="card-header">
+      <div class="month-eyebrow">Normal month onwards</div>
+      <div class="month-name">July+</div>
+      <div class="month-desc">Emergency fund complete · HYSA rebuilding</div>
+    </div>
+    <div class="income-strip">
+      <span>Monthly net</span>
+      <span class="amount">$7,149.46</span>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Fixed expenses</div>
+      <div class="line-item"><span>Rent</span><span class="amt">−$2,773.00</span></div>
+      <div class="line-item"><span>Water / sewer / trash</span><span class="amt">−$40.00</span></div>
+      <div class="line-item"><span>Internet</span><span class="amt">−$35.00</span></div>
+      <div class="line-item"><span>Renters insurance</span><span class="amt">−$7.26</span></div>
+      <div class="line-item"><span>Electricity (est.)</span><span class="amt">−$36.00</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Savings & investments</div>
+      <div class="line-item zero"><span>Emergency fund</span><span class="amt">$0 — fully funded ✓</span></div>
+      <div class="line-item"><span>HYSA (rebuilding)</span><span class="amt">−$2,000.00</span></div>
+      <div class="line-item"><span>Roth IRA</span><span class="amt">−$625.00</span></div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">CC budget left</span>
+      <span class="total-amount">$1,624.20</span>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Essentials (on card)</div>
+      <div class="line-item"><span>Groceries + supplies</span><span class="amt">−$500.00</span></div>
+      <div class="line-item"><span>Gas</span><span class="amt">−$110.00</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Subscriptions (on card)</div>
+      <div class="line-item"><span>Climbing Gym</span><span class="amt">−$121.00</span></div>
+      <div class="line-item"><span>Claude</span><span class="amt">−$22.10</span></div>
+      <div class="line-item"><span>YouTube Music</span><span class="amt">−$20.98</span></div>
+      <div class="line-item"><span>Walmart+</span><span class="amt">−$12.95</span></div>
+      <div class="line-item"><span>Forfeit</span><span class="amt">−$10.99</span></div>
+      <div class="line-item"><span>iCloud</span><span class="amt">−$9.99</span></div>
+      <div class="line-item"><span>Amazon Prime</span><span class="amt">−$7.49</span></div>
+      <div class="line-item"><span>Bunpro</span><span class="amt">−$5.00</span></div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">True discretionary</span>
+      <span class="total-amount">$812.70</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Waterfall breakdown -->
+<div class="waterfall">
+  <div class="waterfall-title">Where the $7,149 goes — both months identical</div>
+
+  <div class="wf-row">
+    <div class="wf-label">Fixed expenses</div>
+    <div class="wf-bar-wrap"><div class="wf-bar" style="background:#1A1612" data-width="40.4"></div></div>
+    <div class="wf-amt">$2,891.26</div>
+  </div>
+  <div class="wf-row">
+    <div class="wf-label">Savings / investments</div>
+    <div class="wf-bar-wrap"><div class="wf-bar" style="background:#4A3F35" data-width="36.7"></div></div>
+    <div class="wf-amt">$2,625.00</div>
+  </div>
+  <div class="wf-row">
+    <div class="wf-label">Essentials (card)</div>
+    <div class="wf-bar-wrap"><div class="wf-bar" style="background:#8A7E74" data-width="8.6"></div></div>
+    <div class="wf-amt">$615.00</div>
+  </div>
+  <div class="wf-row">
+    <div class="wf-label">Subscriptions (card)</div>
+    <div class="wf-bar-wrap"><div class="wf-bar" style="background:#D4A843" data-width="2.8"></div></div>
+    <div class="wf-amt">$198.61</div>
+  </div>
+  <div class="wf-row">
+    <div class="wf-label">True discretionary</div>
+    <div class="wf-bar-wrap"><div class="wf-bar" style="background:#2D6A4F" data-width="11.4"></div></div>
+    <div class="wf-amt">~$812.70</div>
+  </div>
+</div>
+
+<!-- Savings timeline -->
+<div class="timeline-card">
+  <div class="timeline-title">Savings trajectory — emergency fund & HYSA</div>
+  <div class="tl-track">
+    <div class="tl-node">
+      <div class="tl-dot current"></div>
+      <div class="tl-month">Now</div>
+      <div class="tl-ef">EF $8,000</div>
+      <div class="tl-hysa">HYSA $0</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot done"></div>
+      <div class="tl-month">Jul 1</div>
+      <div class="tl-ef">EF $10,000 ✓</div>
+      <div class="tl-hysa">HYSA $0</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot done"></div>
+      <div class="tl-month">Aug 1</div>
+      <div class="tl-ef">EF $10,000</div>
+      <div class="tl-hysa">HYSA $2,000</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot done"></div>
+      <div class="tl-month">Sep 1</div>
+      <div class="tl-ef">EF $10,000</div>
+      <div class="tl-hysa">HYSA $4,000</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot done"></div>
+      <div class="tl-month">Oct 1</div>
+      <div class="tl-ef">EF $10,000</div>
+      <div class="tl-hysa">HYSA $6,000</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot done"></div>
+      <div class="tl-month">Nov 1</div>
+      <div class="tl-ef">EF $10,000</div>
+      <div class="tl-hysa">HYSA $8,000</div>
+    </div>
+  </div>
+</div>
+
+<div class="footnote">
+  Grammarly ($60 quarterly), YNAB ($107 annually), and any other non-monthly charges will hit as one-time expenses when due — not averaged monthly.
+</div>
+
+<script>
+  // Animate bars on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.wf-bar').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+    }, 400);
+  });
+</script>
+</body>
+</html>
