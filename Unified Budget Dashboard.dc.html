@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    body { margin: 0; background: #FAF4EC; }
+    input[type=number] { font-family: 'Space Mono', monospace; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; background:#FAF4EC; font-family:'Plus Jakarta Sans',sans-serif; color:#3A2E26; padding:36px 48px 80px;">
+
+  <div style="max-width:1180px; margin:0 auto;">
+
+    <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+      <div>
+        <div style="font-family:'Lora',serif; font-size:30px; font-weight:600; color:#3A2E26;">Unified Budget &amp; Savings</div>
+      </div>
+      <button onClick="{{ simulateNextMonth }}" style="border:1px solid #E7D8C4; background:#FFFFFF; color:#8A7A6B; font-size:13px; padding:9px 14px; border-radius:10px; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;" style-hover="background:#FCEADD; color:#E2703A;">Simulate Next Month →</button>
+    </div>
+
+    <sc-if value="{{ month.pending }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; background:#FCEADD; border:1px solid #F3D3B6; border-radius:14px; padding:16px 20px; margin:18px 0; flex-wrap:wrap;">
+        <div style="font-size:14.5px; color:#8A4B2A;">Viewing <strong>{{ month.key }}</strong> (Pending Review). Historical data has been safely archived.</div>
+        <button onClick="{{ confirmStartMonth }}" style="border:none; background:#E2703A; color:#fff; font-weight:600; font-size:14px; padding:10px 18px; border-radius:10px; cursor:pointer;">Start New Month</button>
+      </div>
+    </sc-if>
+
+    <div style="display:flex; gap:8px; margin:24px 0 28px; border-bottom:1px solid #EFE1D0;">
+      <button onClick="{{ goTab }}" data-tab="dashboard" style="{{ tabStyle_dashboard }}">Monthly Dashboard</button>
+      <button onClick="{{ goTab }}" data-tab="buckets" style="{{ tabStyle_buckets }}">Savings Buckets</button>
+      <button onClick="{{ goTab }}" data-tab="timeline" style="{{ tabStyle_timeline }}">Timeline &amp; Milestones</button>
+      <button onClick="{{ goTab }}" data-tab="history" style="{{ tabStyle_history }}">History &amp; Archives</button>
+    </div>
+
+    <!-- ===================== DASHBOARD TAB ===================== -->
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Monthly Dashboard">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; margin-bottom:22px;">
+          <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="font-size:13px; color:#8A7A6B; font-weight:600; letter-spacing:.02em; text-transform:uppercase;">Monthly Net Income</div>
+              <div style="position:relative;">
+                <span data-tip="income" onMouseEnter="{{ showTip }}" onMouseLeave="{{ hideTip }}" style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; border:1px solid #C9B79E; color:#8A7A6B; font-size:10.5px; font-family:'Space Mono',monospace; cursor:help;">i</span>
+                <sc-if value="{{ showTipIncome }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute; top:22px; left:0; width:240px; background:#3A2E26; color:#FAF4EC; font-size:12px; line-height:1.5; padding:10px 12px; border-radius:10px; z-index:30; font-family:'Plus Jakarta Sans',sans-serif;">{{ tipIncomeText }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:4px; margin-top:10px;">
+              <span style="font-family:'Space Mono',monospace; font-size:22px; color:#8A7A6B;">$</span>
+              <input type="number" step="0.01" defaultValue="{{ month.income }}" onBlur="{{ handleIncomeChange }}" onKeyDown="{{ commitOnEnter }}" style="border:none; background:transparent; font-family:'Space Mono',monospace; font-size:28px; font-weight:700; color:#3A2E26; width:170px; outline:none;" style-focus="outline:none;" />
+            </div>
+          </div>
+          <div style="background:#E2703A; border-radius:16px; padding:22px; color:#fff;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="font-size:13px; font-weight:600; letter-spacing:.02em; text-transform:uppercase; opacity:.85;">True Discretionary</div>
+              <div style="position:relative;">
+                <span data-tip="discretionary" onMouseEnter="{{ showTip }}" onMouseLeave="{{ hideTip }}" style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; border:1px solid rgba(255,255,255,.6); color:#fff; font-size:10.5px; font-family:'Space Mono',monospace; cursor:help;">i</span>
+                <sc-if value="{{ showTipDiscretionary }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute; top:22px; left:0; width:270px; background:#3A2E26; color:#FAF4EC; font-size:12px; line-height:1.5; padding:10px 12px; border-radius:10px; z-index:30; font-family:'Plus Jakarta Sans',sans-serif;">{{ tipDiscretionaryText }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="font-family:'Space Mono',monospace; font-size:28px; font-weight:700; margin-top:10px;">{{ fmtTrueDiscretionary }}</div>
+          </div>
+          <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="font-size:13px; color:#8A7A6B; font-weight:600; letter-spacing:.02em; text-transform:uppercase;">Left for Free Spending</div>
+              <div style="position:relative;">
+                <span data-tip="free" onMouseEnter="{{ showTip }}" onMouseLeave="{{ hideTip }}" style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; border:1px solid #C9B79E; color:#8A7A6B; font-size:10.5px; font-family:'Space Mono',monospace; cursor:help;">i</span>
+                <sc-if value="{{ showTipFree }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute; top:22px; right:0; width:270px; background:#3A2E26; color:#FAF4EC; font-size:12px; line-height:1.5; padding:10px 12px; border-radius:10px; z-index:30; font-family:'Plus Jakarta Sans',sans-serif;">{{ tipFreeText }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="font-family:'Space Mono',monospace; font-size:28px; font-weight:700; margin-top:10px; color:{{ freeSpendingColor }};">{{ fmtLeftForFreeSpending }}</div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:8px; font-size:13px; color:#8A7A6B;">
+              <span>Spent from Discretionary (Quick Log)</span>
+              <span style="font-family:'Space Mono',monospace; color:#3A2E26; font-weight:600;">{{ fmtQuickLogTotal }}</span>
+            </div>
+            <div style="font-size:12px; color:#B79E86; margin-top:4px;">+ {{ fmtBucketAlloc }} recurring &amp; {{ fmtBucketTopUps }} one-time to buckets · log spontaneous spend in Savings Buckets tab</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;">
+
+          <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <div style="font-family:'Lora',serif; font-size:17px; font-weight:600;">Fixed expenses</div>
+              <button onClick="{{ addItem }}" data-group="fixed" style="border:none; background:#F5EDE3; color:#8A7A6B; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; cursor:pointer;" style-hover="background:#FCEADD; color:#E2703A;">+ add</button>
+            </div>
+            <sc-for list="{{ month.fixedExpenses }}" as="item" hint-placeholder-count="5">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #F5EEE4;">
+                <input defaultValue="{{ item.name }}" data-id="{{ item.id }}" data-group="fixed" data-field="name" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="border:none; background:transparent; font-size:14.5px; color:#3A2E26; flex:1; outline:none;" />
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="color:#B79E86; font-size:14px; font-family:'Space Mono',monospace;">−$</span>
+                  <input type="number" step="0.01" defaultValue="{{ item.amount }}" data-id="{{ item.id }}" data-group="fixed" data-field="amount" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="width:82px; text-align:right; border:none; background:transparent; font-size:14.5px; color:#3A2E26; outline:none;" />
+                  <button onClick="{{ removeItem }}" data-id="{{ item.id }}" data-group="fixed" style="border:none; background:transparent; color:#C1543A; cursor:pointer; font-size:16px; line-height:1; padding:2px; opacity:.6;" style-hover="opacity:1;">×</button>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex; justify-content:space-between; padding-top:12px; font-size:14px; font-weight:600; color:#8A7A6B;">
+              <span>Total</span><span style="font-family:'Space Mono',monospace;">{{ fmtFixedTotal }}</span>
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px;">
+            <div style="font-family:'Lora',serif; font-size:17px; font-weight:600; margin-bottom:6px;">Savings &amp; investments</div>
+            <sc-for list="{{ month.savings }}" as="item" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #F5EEE4;">
+                <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                  <input defaultValue="{{ item.name }}" data-id="{{ item.id }}" data-group="savings" data-field="name" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="border:none; background:transparent; font-size:14.5px; color:#3A2E26; outline:none; flex:1;" />
+                  <button onClick="{{ togglePaused }}" data-id="{{ item.id }}" style="border:none; border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600; cursor:pointer; background:{{ item.pausedBg }}; color:{{ item.pausedColor }};">{{ item.pausedLabel }}</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="color:#B79E86; font-size:14px; font-family:'Space Mono',monospace;">−$</span>
+                  <input type="number" step="0.01" defaultValue="{{ item.amount }}" data-id="{{ item.id }}" data-group="savings" data-field="amount" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="width:82px; text-align:right; border:none; background:transparent; font-size:14.5px; color:#3A2E26; outline:none;" />
+                  <button onClick="{{ removeItem }}" data-id="{{ item.id }}" data-group="savings" style="border:none; background:transparent; color:#C1543A; cursor:pointer; font-size:16px; line-height:1; padding:2px; opacity:.6;" style-hover="opacity:1;">×</button>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex; justify-content:space-between; padding-top:12px; font-size:14px; font-weight:600; color:#8A7A6B;">
+              <span>Total</span><span style="font-family:'Space Mono',monospace;">{{ fmtSavingsTotal }}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;">
+
+          <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <div style="font-family:'Lora',serif; font-size:17px; font-weight:600;">Essentials <span style="font-size:12px; font-weight:500; color:#8A7A6B;">(on card)</span></div>
+              <button onClick="{{ addItem }}" data-group="essentials" style="border:none; background:#F5EDE3; color:#8A7A6B; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; cursor:pointer;" style-hover="background:#FCEADD; color:#E2703A;">+ add</button>
+            </div>
+            <sc-for list="{{ month.essentials }}" as="item" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #F5EEE4;">
+                <input defaultValue="{{ item.name }}" data-id="{{ item.id }}" data-group="essentials" data-field="name" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="border:none; background:transparent; font-size:14.5px; color:#3A2E26; flex:1; outline:none;" />
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="color:#B79E86; font-size:14px; font-family:'Space Mono',monospace;">−$</span>
+                  <input type="number" step="0.01" defaultValue="{{ item.amount }}" data-id="{{ item.id }}" data-group="essentials" data-field="amount" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="width:82px; text-align:right; border:none; background:transparent; font-size:14.5px; color:#3A2E26; outline:none;" />
+                  <button onClick="{{ removeItem }}" data-id="{{ item.id }}" data-group="essentials" style="border:none; background:transparent; color:#C1543A; cursor:pointer; font-size:16px; line-height:1; padding:2px; opacity:.6;" style-hover="opacity:1;">×</button>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex; justify-content:space-between; padding-top:12px; font-size:14px; font-weight:600; color:#8A7A6B;">
+              <span>Total</span><span style="font-family:'Space Mono',monospace;">{{ fmtEssentialsTotal }}</span>
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <div style="font-family:'Lora',serif; font-size:17px; font-weight:600;">Subscriptions <span style="font-size:12px; font-weight:500; color:#8A7A6B;">(on card)</span></div>
+              <button onClick="{{ addItem }}" data-group="subscriptions" style="border:none; background:#F5EDE3; color:#8A7A6B; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; cursor:pointer;" style-hover="background:#FCEADD; color:#E2703A;">+ add</button>
+            </div>
+            <div style="max-height:280px; overflow-y:auto;">
+            <sc-for list="{{ month.subscriptions }}" as="item" hint-placeholder-count="10">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid #F5EEE4;">
+                <input defaultValue="{{ item.name }}" data-id="{{ item.id }}" data-group="subscriptions" data-field="name" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="border:none; background:transparent; font-size:14px; color:#3A2E26; flex:1; outline:none;" />
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="color:#B79E86; font-size:13px; font-family:'Space Mono',monospace;">−$</span>
+                  <input type="number" step="0.01" defaultValue="{{ item.amount }}" data-id="{{ item.id }}" data-group="subscriptions" data-field="amount" onBlur="{{ handleFieldChange }}" onKeyDown="{{ commitOnEnter }}" style="width:74px; text-align:right; border:none; background:transparent; font-size:14px; color:#3A2E26; outline:none;" />
+                  <button onClick="{{ removeItem }}" data-id="{{ item.id }}" data-group="subscriptions" style="border:none; background:transparent; color:#C1543A; cursor:pointer; font-size:16px; line-height:1; padding:2px; opacity:.6;" style-hover="opacity:1;">×</button>
+                </div>
+              </div>
+            </sc-for>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding-top:12px; font-size:14px; font-weight:600; color:#8A7A6B;">
+              <span>Total</span><span style="font-family:'Space Mono',monospace;">{{ fmtSubsTotal }}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px; margin-bottom:18px; display:grid; grid-template-columns:220px 1fr; gap:26px; align-items:center;">
+          <div style="width:220px; height:220px; position:relative;">
+            <canvas ref="{{ cashFlowChartRef }}" width="220" height="220"></canvas>
+          </div>
+          <div>
+            <div style="font-family:'Lora',serif; font-size:17px; font-weight:600; margin-bottom:12px;">Where your income goes</div>
+            <sc-for list="{{ cashFlowLegend }}" as="row" hint-placeholder-count="5">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F5EEE4; font-size:14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:10px; height:10px; border-radius:50%; background:{{ row.color }}; display:inline-block;"></span>
+                  <span style="color:#3A2E26;">{{ row.label }}</span>
+                </div>
+                <span style="color:#8A7A6B; font-weight:600; font-family:'Space Mono',monospace;">{{ row.fmtValue }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <!-- ===================== BUCKETS TAB ===================== -->
+    <sc-if value="{{ isBuckets }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Savings Buckets">
+        <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px; margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:10px;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:700; color:#3A2E26;">Weekly Spending Guardrail</div>
+            <div style="font-size:13px; color:#8A7A6B;">{{ pacerWeeksRemaining }} week(s) left this month</div>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:10px; margin-top:14px;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:32px; font-weight:700; color:{{ pacerColor }};">{{ fmtPacerRemaining }}</div>
+            <div style="font-size:13.5px; color:#8A7A6B;">left of {{ fmtPacerAllowance }} this week</div>
+          </div>
+          <div style="height:10px; background:#F5EDE3; border-radius:6px; margin-top:14px; overflow:hidden;">
+            <div style="height:100%; background:{{ pacerBarColor }}; width:{{ pacerPct }}%; border-radius:6px;"></div>
+          </div>
+          <sc-if value="{{ pacerHasMessage }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px; margin-top:10px; padding:9px 12px; border-radius:8px; background:{{ pacerMessageBg }}; color:{{ pacerMessageColor }}; font-family:'Plus Jakarta Sans',sans-serif;">{{ pacerMessageIcon }} {{ pacerMessage }}</div>
+          </sc-if>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+          <div style="font-size:14.5px; color:#8A7A6B;">Left for Free Spending: <strong style="color:{{ freeSpendingColor }}; font-family:'Space Mono',monospace;">{{ fmtLeftForFreeSpending }}</strong></div>
+          <button onClick="{{ addBucket }}" style="border:none; background:#E2703A; color:#fff; font-weight:600; font-size:13.5px; padding:9px 16px; border-radius:10px; cursor:pointer;">+ New Bucket</button>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px; margin-bottom:22px; display:grid; grid-template-columns:220px 1fr; gap:26px; align-items:center;">
+          <div style="width:220px; height:220px; position:relative;">
+            <canvas ref="{{ discretionaryChartRef }}" width="220" height="220"></canvas>
+          </div>
+          <div>
+            <div style="font-family:'Lora',serif; font-size:17px; font-weight:600; margin-bottom:12px;">Discretionary allocation</div>
+            <sc-for list="{{ discretionaryLegend }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F5EEE4; font-size:14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="width:10px; height:10px; border-radius:50%; background:{{ row.color }}; display:inline-block;"></span>
+                  <span style="color:#3A2E26;">{{ row.label }}</span>
+                </div>
+                <span style="color:#8A7A6B; font-weight:600; font-family:'Space Mono',monospace;">{{ row.fmtValue }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px;">
+          <sc-for list="{{ month.buckets }}" as="b" hint-placeholder-count="3">
+            <div data-bucket-row="{{ b.id }}" style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <input defaultValue="{{ b.name }}" data-id="{{ b.id }}" onBlur="{{ updateBucketName }}" onKeyDown="{{ commitOnEnter }}" style="border:none; background:transparent; font-family:'Lora',serif; font-size:16px; font-weight:600; color:#3A2E26; flex:1; outline:none;" />
+                <button onClick="{{ deleteBucket }}" data-id="{{ b.id }}" style="border:none; background:transparent; color:#C1543A; cursor:pointer; font-size:17px; opacity:.6;" style-hover="opacity:1;">×</button>
+              </div>
+              <div style="height:9px; background:#F5EDE3; border-radius:6px; overflow:hidden;">
+                <div style="height:100%; background:{{ b.barColor }}; width:{{ b.pct }}%; border-radius:6px;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:13.5px; color:#8A7A6B;">
+                <span style="font-family:'Space Mono',monospace;">{{ b.fmtFunded }} funded</span>
+                <span>target $<input type="number" step="1" defaultValue="{{ b.target }}" data-id="{{ b.id }}" onBlur="{{ updateBucketTarget }}" onKeyDown="{{ commitOnEnter }}" style="width:64px; border:none; border-bottom:1px solid #E7D8C4; background:transparent; color:#3A2E26; outline:none; text-align:right;" /></span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:{{ b.statusColor }}; font-family:'Space Mono',monospace;">{{ b.statusLabel }}</div>
+              <div>
+                <div style="font-size:11.5px; color:#B79E86; font-weight:600; text-transform:uppercase; letter-spacing:.02em; margin-bottom:4px;">Recurring monthly contribution</div>
+                <div style="font-size:13.5px; color:#8A7A6B;">$<input type="number" step="1" defaultValue="{{ b.monthlyAlloc }}" data-id="{{ b.id }}" onBlur="{{ updateBucketAlloc }}" onKeyDown="{{ commitOnEnter }}" style="width:60px; border:none; border-bottom:1px solid #E7D8C4; background:transparent; color:#3A2E26; outline:none;" />/mo — reserved from Left for Free Spending automatically</div>
+              </div>
+              <div>
+                <div style="font-size:11.5px; color:#B79E86; font-weight:600; text-transform:uppercase; letter-spacing:.02em; margin-bottom:4px;">One-time top-up</div>
+                <div style="display:flex; gap:8px;">
+                  <input type="number" step="1" placeholder="Add $" data-fund-input style="flex:1; border:1px solid #E7D8C4; border-radius:8px; padding:8px 10px; font-size:13.5px; background:#FAF4EC; outline:none;" />
+                  <button onClick="{{ addFunds }}" data-id="{{ b.id }}" style="border:none; background:#F5EDE3; color:#3A2E26; font-weight:600; font-size:13px; padding:8px 14px; border-radius:8px; cursor:pointer;" style-hover="background:#FCEADD; color:#E2703A;">Add now</button>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:22px; margin-top:18px;">
+          <div style="font-family:'Lora',serif; font-size:17px; font-weight:600; margin-bottom:4px;">Quick Log &amp; Spontaneous Feed</div>
+          <div style="font-size:13px; color:#8A7A6B; margin-bottom:16px;">Log day-to-day card swipes — coffee, Target runs, spur-of-the-moment spending — that don't belong to a bucket or a Tab 1 essential.</div>
+          <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:4px; background:#FAF4EC; border:1px solid #E7D8C4; border-radius:8px; padding:8px 12px;">
+              <span style="color:#B79E86; font-size:14px; font-family:'Space Mono',monospace;">$</span>
+              <input type="number" step="0.01" placeholder="0.00" ref="{{ setQuickLogAmountRef }}" style="border:none; background:transparent; width:80px; font-size:14px; color:#3A2E26; outline:none; font-family:'Space Mono',monospace;" />
+            </div>
+            <input type="text" placeholder="Description (e.g. coffee, Target run)" ref="{{ setQuickLogDescRef }}" style="flex:1; min-width:220px; border:1px solid #E7D8C4; border-radius:8px; padding:9px 12px; font-size:14px; background:#FAF4EC; color:#3A2E26; outline:none;" />
+            <button onClick="{{ logExpense }}" style="border:none; background:#E2703A; color:#fff; font-weight:600; font-size:13.5px; padding:9px 18px; border-radius:8px; cursor:pointer;">Log Expense</button>
+          </div>
+          <div style="max-height:280px; overflow-y:auto;">
+            <sc-if value="{{ hasQuickLog }}" hint-placeholder-val="{{ true }}">
+              <sc-for list="{{ quickLogFeed }}" as="q" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #F5EEE4;">
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:14px; color:#3A2E26;">{{ q.description }}</div>
+                    <div style="font-size:11.5px; color:#B79E86; margin-top:2px;">{{ q.fmtDate }}</div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-family:'Space Mono',monospace; font-size:14.5px; color:#C1543A;">−{{ q.fmtAmount }}</span>
+                    <button onClick="{{ deleteQuickLogItem }}" data-id="{{ q.id }}" style="border:none; background:transparent; color:#C1543A; cursor:pointer; font-size:16px; line-height:1; padding:2px; opacity:.6;" style-hover="opacity:1;">×</button>
+                  </div>
+                </div>
+              </sc-for>
+            </sc-if>
+            <sc-if value="{{ hasNoQuickLog }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center; padding:30px 20px; color:#B79E86; font-size:13.5px;">No spontaneous spending logged this month yet.</div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== TIMELINE TAB ===================== -->
+    <sc-if value="{{ isTimeline }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Timeline & Milestones" style="display:flex; flex-direction:column; gap:20px;">
+
+        <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:10px; margin-bottom:22px;">
+            <div style="font-family:'Lora',serif; font-size:18px; font-weight:600;">Emergency Fund</div>
+            <div style="font-size:13.5px; color:#8A7A6B;">
+              balance $<input type="number" step="1" defaultValue="{{ month.emergencyFund.balance }}" data-fund="emergencyFund" data-field="balance" onBlur="{{ updateFundField }}" onKeyDown="{{ commitOnEnter }}" style="width:70px; border:none; border-bottom:1px solid #E7D8C4; background:transparent; color:#3A2E26; outline:none;" />
+              &nbsp;/ target $<input type="number" step="1" defaultValue="{{ month.emergencyFund.target }}" data-fund="emergencyFund" data-field="target" onBlur="{{ updateFundField }}" onKeyDown="{{ commitOnEnter }}" style="width:70px; border:none; border-bottom:1px solid #E7D8C4; background:transparent; color:#3A2E26; outline:none;" />
+              &nbsp;· contributing <span style="font-family:'Space Mono',monospace;">{{ fmtEfContribution }}</span>/mo
+            </div>
+          </div>
+          <div style="display:flex; border-radius:6px; overflow:hidden; height:10px; width:100%;">
+            <sc-for list="{{ efColumns }}" as="col" hint-placeholder-count="4">
+              <div style="flex:1; height:100%; background:{{ col.color }}; margin-right:2px;"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex; width:100%; margin-top:10px;">
+            <sc-for list="{{ efColumns }}" as="col" hint-placeholder-count="12">
+              <div style="flex:1; text-align:center; min-width:0;">
+                <div style="font-size:11px; color:{{ col.labelColor }}; font-weight:{{ col.labelWeight }};">{{ col.label }}</div>
+                <sc-if value="{{ col.isMilestone }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:10px; font-weight:700; color:#4F8F63; margin-top:3px; font-family:'Space Mono',monospace;">🎯 {{ col.milestoneLabel }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ efHasOffChart }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px; color:#8A7A6B; margin-top:10px;">🎯 Projected completion beyond this view: <strong style="font-family:'Space Mono',monospace; color:#4F8F63;">{{ efOffChartLabel }}</strong></div>
+          </sc-if>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:10px; margin-bottom:22px;">
+            <div style="font-family:'Lora',serif; font-size:18px; font-weight:600;">HYSA</div>
+            <div style="font-size:13.5px; color:#8A7A6B;">
+              balance $<input type="number" step="1" defaultValue="{{ month.hysa.balance }}" data-fund="hysa" data-field="balance" onBlur="{{ updateFundField }}" onKeyDown="{{ commitOnEnter }}" style="width:70px; border:none; border-bottom:1px solid #E7D8C4; background:transparent; color:#3A2E26; outline:none;" />
+              &nbsp;/ target $<input type="number" step="1" defaultValue="{{ month.hysa.target }}" data-fund="hysa" data-field="target" onBlur="{{ updateFundField }}" onKeyDown="{{ commitOnEnter }}" style="width:70px; border:none; border-bottom:1px solid #E7D8C4; background:transparent; color:#3A2E26; outline:none;" />
+              &nbsp;· {{ fmtHysaStatus }}
+            </div>
+          </div>
+          <sc-if value="{{ hysaPaused }}" hint-placeholder-val="{{ false }}">
+            <div style="display:inline-block; font-size:11.5px; font-weight:600; color:#B79E86; background:#FAF4EC; padding:3px 10px; border-radius:6px; margin-bottom:10px;">paused — no contribution this month</div>
+          </sc-if>
+          <div style="display:flex; border-radius:6px; overflow:hidden; height:10px; width:100%;">
+            <sc-for list="{{ hysaColumns }}" as="col" hint-placeholder-count="4">
+              <div style="flex:1; height:100%; background:{{ col.color }}; margin-right:2px;"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex; width:100%; margin-top:10px;">
+            <sc-for list="{{ hysaColumns }}" as="col" hint-placeholder-count="12">
+              <div style="flex:1; text-align:center; min-width:0;">
+                <div style="font-size:11px; color:{{ col.labelColor }}; font-weight:{{ col.labelWeight }};">{{ col.label }}</div>
+                <sc-if value="{{ col.isMilestone }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:10px; font-weight:700; color:#E2703A; margin-top:3px; font-family:'Space Mono',monospace;">🎯 {{ col.milestoneLabel }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hysaHasOffChart }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px; color:#8A7A6B; margin-top:10px;">🎯 Projected completion beyond this view: <strong style="font-family:'Space Mono',monospace; color:#E2703A;">{{ hysaOffChartLabel }}</strong></div>
+          </sc-if>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <!-- ===================== HISTORY TAB ===================== -->
+    <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="History & Archives">
+        <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px;">
+            <sc-for list="{{ history }}" as="h" hint-placeholder-count="2">
+              <div style="background:#FFFFFF; border:1px solid #F0E4D6; border-radius:16px; padding:20px; opacity:.85;">
+                <div style="font-family:'Lora',serif; font-size:16px; font-weight:600; margin-bottom:10px;">{{ h.key }}</div>
+                <div style="display:flex; justify-content:space-between; font-size:13.5px; color:#8A7A6B; padding:5px 0; border-bottom:1px solid #F5EEE4;"><span>Income</span><span style="font-family:'Space Mono',monospace;">{{ h.fmtIncome }}</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13.5px; color:#8A7A6B; padding:5px 0; border-bottom:1px solid #F5EEE4;"><span>True discretionary</span><span style="font-family:'Space Mono',monospace;">{{ h.fmtDiscretionary }}</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13.5px; color:#8A7A6B; padding:5px 0; border-bottom:1px solid #F5EEE4;"><span>Left for free spending</span><span style="color:{{ h.leftColor }}; font-family:'Space Mono',monospace;">{{ h.fmtLeft }}</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13.5px; color:#8A7A6B; padding:5px 0;"><span>Buckets funded</span><span style="font-family:'Space Mono',monospace;">{{ h.bucketsFunded }} / {{ h.bucketsCount }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasNoHistory }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:60px 20px; color:#8A7A6B; font-size:14.5px;">No archived months yet — use "Simulate Next Month" to build history.</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280}, &quot;layoutDensity&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;spacious&quot;, &quot;options&quot;: [&quot;spacious&quot;, &quot;compact&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Layout&quot;}, &quot;showCents&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Layout&quot;}, &quot;confettiIntensity&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;full&quot;, &quot;options&quot;: [&quot;subtle&quot;, &quot;full&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Celebrations&quot;}}">
+class Component extends DCLogic {
+  cashFlowChartRef = React.createRef();
+  discretionaryChartRef = React.createRef();
+
+  state = {
+    activeTab: 'dashboard',
+    hoverTip: null,
+    completedIds: [],
+    pacer: { weekAnchor: null, weekStartPool: null },
+    history: [
+      { key: 'April 2026', income: 7020.00, trueDiscretionary: 845.10, leftForFreeSpending: 120.40, bucketsCount: 3, bucketsFunded: 0 },
+      { key: 'May 2026', income: 7149.46, trueDiscretionary: 960.25, leftForFreeSpending: -45.00, bucketsCount: 3, bucketsFunded: 0 },
+    ],
+    template: {
+      fixedExpenses: [
+        { id: 'fx1', name: 'Rent', amount: 2773.00 },
+        { id: 'fx2', name: 'Water / sewer / trash', amount: 73.55 },
+        { id: 'fx3', name: 'Internet', amount: 45.33 },
+        { id: 'fx4', name: 'Renters insurance', amount: 7.26 },
+        { id: 'fx5', name: 'Electricity/Gas', amount: 89.73 },
+      ],
+      essentials: [
+        { id: 'es1', name: 'Groceries + supplies', amount: 355.00 },
+        { id: 'es2', name: 'Gas', amount: 52.00 },
+        { id: 'es3', name: 'Public Transit + Parking', amount: 8.00 },
+        { id: 'es4', name: 'Restaurants', amount: 200.00 },
+      ],
+      subscriptions: [
+        { id: 'sb1', name: 'Climbing Gym', amount: 121.00 },
+        { id: 'sb2', name: 'Claude', amount: 22.10 },
+        { id: 'sb3', name: 'YouTube Music', amount: 20.98 },
+        { id: 'sb4', name: 'Walmart+', amount: 12.95 },
+        { id: 'sb5', name: 'Forfeit', amount: 10.99 },
+        { id: 'sb6', name: 'iCloud', amount: 9.99 },
+        { id: 'sb7', name: 'Amazon Prime', amount: 7.49 },
+        { id: 'sb8', name: 'Bunpro', amount: 5.00 },
+        { id: 'sb9', name: '750 Words', amount: 5.00 },
+        { id: 'sb10', name: 'Audible', amount: 6.95 },
+      ],
+      savings: [
+        { id: 'sv1', name: 'Emergency fund (replenish)', amount: 2000.00, paused: false },
+        { id: 'sv2', name: 'HYSA', amount: 0, paused: true },
+        { id: 'sv3', name: 'Roth IRA', amount: 511.36, paused: false },
+      ],
+    },
+    month: {
+      key: 'June 2026',
+      tagline: 'Emergency fund rebuild · HYSA paused',
+      pending: false,
+      income: 7149.46,
+      rolloverIn: -45.00,
+      fixedExpenses: [
+        { id: 'fx1', name: 'Rent', amount: 2773.00 },
+        { id: 'fx2', name: 'Water / sewer / trash', amount: 73.55 },
+        { id: 'fx3', name: 'Internet', amount: 45.33 },
+        { id: 'fx4', name: 'Renters insurance', amount: 7.26 },
+        { id: 'fx5', name: 'Electricity/Gas', amount: 89.73 },
+      ],
+      essentials: [
+        { id: 'es1', name: 'Groceries + supplies', amount: 355.00 },
+        { id: 'es2', name: 'Gas', amount: 52.00 },
+        { id: 'es3', name: 'Public Transit + Parking', amount: 8.00 },
+        { id: 'es4', name: 'Restaurants', amount: 200.00 },
+      ],
+      subscriptions: [
+        { id: 'sb1', name: 'Climbing Gym', amount: 121.00 },
+        { id: 'sb2', name: 'Claude', amount: 22.10 },
+        { id: 'sb3', name: 'YouTube Music', amount: 20.98 },
+        { id: 'sb4', name: 'Walmart+', amount: 12.95 },
+        { id: 'sb5', name: 'Forfeit', amount: 10.99 },
+        { id: 'sb6', name: 'iCloud', amount: 9.99 },
+        { id: 'sb7', name: 'Amazon Prime', amount: 7.49 },
+        { id: 'sb8', name: 'Bunpro', amount: 5.00 },
+        { id: 'sb9', name: '750 Words', amount: 5.00 },
+        { id: 'sb10', name: 'Audible', amount: 6.95 },
+      ],
+      savings: [
+        { id: 'sv1', name: 'Emergency fund (replenish)', amount: 2000.00, paused: false },
+        { id: 'sv2', name: 'HYSA', amount: 0, paused: true },
+        { id: 'sv3', name: 'Roth IRA', amount: 511.36, paused: false },
+      ],
+      quickLog: [
+        { id: 'ql1', amount: 14.50, description: 'Coffee run', ts: Date.now() - 86400000 * 3 },
+        { id: 'ql2', amount: 38.20, description: 'Target — misc', ts: Date.now() - 86400000 },
+      ],
+      manualSpent: 0,
+      bucketTopUps: 0,
+      buckets: [
+        { id: 'bk1', name: 'New Climbing Shoes', target: 180, funded: 140, monthlyAlloc: 40 },
+        { id: 'bk2', name: 'Japan Trip Fund', target: 3000, funded: 450, monthlyAlloc: 150 },
+        { id: 'bk3', name: 'New Bike', target: 600, funded: 560, monthlyAlloc: 40 },
+      ],
+      emergencyFund: { target: 12000, balance: 7200 },
+      hysa: { target: 5000, balance: 3000 },
+    },
+  };
+
+  genId() {
+    this._idc = (this._idc || 0) + 1;
+    return 'id' + this._idc + Date.now().toString(36);
+  }
+
+  fmt(n) {
+    const showCents = this.props.showCents !== false;
+    const sign = n < 0 ? '-' : '';
+    const v = Math.abs(n);
+    return sign + '$' + v.toLocaleString('en-US', { minimumFractionDigits: showCents ? 2 : 0, maximumFractionDigits: showCents ? 2 : 0 });
+  }
+
+  showTip(e) { this.setState({ hoverTip: e.currentTarget.dataset.tip }); }
+  hideTip() { this.setState({ hoverTip: null }); }
+
+  commitOnEnter(e) {
+    if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+  }
+
+  calcTotals(m) {
+    const sum = arr => arr.reduce((a, x) => a + (x.amount || 0), 0);
+    const fixedTotal = sum(m.fixedExpenses);
+    const essentialsTotal = sum(m.essentials);
+    const subsTotal = sum(m.subscriptions);
+    const savingsTotal = sum(m.savings);
+    const ccSpent = essentialsTotal + subsTotal;
+    const bucketAllocTotal = m.buckets.reduce((a, b) => a + (b.monthlyAlloc || 0), 0);
+    const rolloverIn = m.rolloverIn || 0;
+    const manualSpent = (m.quickLog || []).reduce((a, x) => a + (x.amount || 0), 0);
+    const bucketTopUps = m.bucketTopUps || 0;
+    const trueDiscretionary = m.income - fixedTotal - savingsTotal - essentialsTotal - subsTotal + rolloverIn;
+    const ccPoolTotal = trueDiscretionary + ccSpent;
+    const leftForFreeSpending = trueDiscretionary - bucketAllocTotal - manualSpent - bucketTopUps;
+    return { fixedTotal, essentialsTotal, subsTotal, savingsTotal, ccSpent, ccPoolTotal, bucketAllocTotal, rolloverIn, manualSpent, bucketTopUps, trueDiscretionary, leftForFreeSpending };
+  }
+
+  getFieldKey(group) {
+    return { fixed: 'fixedExpenses', essentials: 'essentials', subscriptions: 'subscriptions', savings: 'savings' }[group];
+  }
+
+  goTab(e) { this.setState({ activeTab: e.currentTarget.dataset.tab }); }
+
+  handleIncomeChange(e) {
+    const val = parseFloat(e.target.value) || 0;
+    this.setState(s => ({ month: { ...s.month, income: val } }));
+  }
+
+  handleSpentChange(e) {
+    const val = parseFloat(e.target.value) || 0;
+    this.setState(s => ({ month: { ...s.month, manualSpent: val } }));
+  }
+
+  handleFieldChange(e) {
+    const { id, group, field } = e.currentTarget.dataset;
+    const key = this.getFieldKey(group);
+    let val = e.target.value;
+    if (field !== 'name') val = parseFloat(val) || 0;
+    this.setState(s => ({ month: { ...s.month, [key]: s.month[key].map(x => x.id === id ? { ...x, [field]: val } : x) } }));
+  }
+
+  removeItem(e) {
+    const { id, group } = e.currentTarget.dataset;
+    const key = this.getFieldKey(group);
+    this.setState(s => ({ month: { ...s.month, [key]: s.month[key].filter(x => x.id !== id) } }));
+  }
+
+  addItem(e) {
+    const group = e.currentTarget.dataset.group;
+    const key = this.getFieldKey(group);
+    const item = { id: this.genId(), name: 'New item', amount: 0 };
+    if (group === 'savings') item.paused = false;
+    this.setState(s => ({ month: { ...s.month, [key]: [...s.month[key], item] } }));
+  }
+
+  togglePaused(e) {
+    const id = e.currentTarget.dataset.id;
+    this.setState(s => ({ month: { ...s.month, savings: s.month.savings.map(x => x.id === id ? { ...x, paused: !x.paused } : x) } }));
+  }
+
+  addBucket() {
+    const item = { id: this.genId(), name: 'New Bucket', target: 500, funded: 0, monthlyAlloc: 0 };
+    this.setState(s => ({ month: { ...s.month, buckets: [...s.month.buckets, item] } }));
+  }
+
+  updateBucketName(e) {
+    const id = e.currentTarget.dataset.id;
+    const val = e.target.value;
+    this.setState(s => ({ month: { ...s.month, buckets: s.month.buckets.map(b => b.id === id ? { ...b, name: val } : b) } }));
+  }
+
+  updateBucketAlloc(e) {
+    const id = e.currentTarget.dataset.id;
+    const val = parseFloat(e.target.value) || 0;
+    this.setState(s => ({ month: { ...s.month, buckets: s.month.buckets.map(b => b.id === id ? { ...b, monthlyAlloc: val } : b) } }));
+  }
+
+  updateBucketTarget(e) {
+    const id = e.currentTarget.dataset.id;
+    const newTarget = parseFloat(e.target.value) || 0;
+    this.setState(s => {
+      let releaseAmt = 0;
+      const buckets = s.month.buckets.map(b => {
+        if (b.id !== id) return b;
+        let funded = b.funded;
+        if (funded > newTarget) { releaseAmt = funded - newTarget; funded = newTarget; }
+        return { ...b, target: newTarget, funded };
+      });
+      return { month: { ...s.month, buckets, bucketTopUps: s.month.bucketTopUps - releaseAmt } };
+    });
+  }
+
+  deleteBucket(e) {
+    const id = e.currentTarget.dataset.id;
+    this.setState(s => {
+      const b = s.month.buckets.find(x => x.id === id);
+      const release = b ? b.funded : 0;
+      return { month: { ...s.month, buckets: s.month.buckets.filter(x => x.id !== id), bucketTopUps: s.month.bucketTopUps - release } };
+    });
+  }
+
+  addFunds(e) {
+    const id = e.currentTarget.dataset.id;
+    const row = e.currentTarget.closest('[data-bucket-row]');
+    const input = row ? row.querySelector('input[data-fund-input]') : null;
+    const amt = input ? (parseFloat(input.value) || 0) : 0;
+    if (amt <= 0) return;
+    this.setState(s => ({
+      month: {
+        ...s.month,
+        buckets: s.month.buckets.map(b => b.id === id ? { ...b, funded: Math.min(b.target, b.funded + amt) } : b),
+        bucketTopUps: s.month.bucketTopUps + amt,
+      },
+    }));
+    if (input) input.value = '';
+  }
+
+  logExpense() {
+    const amtInput = this._quickLogAmountRef;
+    const descInput = this._quickLogDescRef;
+    const amt = amtInput ? (parseFloat(amtInput.value) || 0) : 0;
+    if (amt <= 0) return;
+    const description = descInput && descInput.value.trim() ? descInput.value.trim() : 'Spontaneous spend';
+    const item = { id: this.genId(), amount: amt, description, ts: Date.now() };
+    this.setState(s => ({ month: { ...s.month, quickLog: [...(s.month.quickLog || []), item] } }));
+    if (amtInput) amtInput.value = '';
+    if (descInput) descInput.value = '';
+  }
+
+  deleteQuickLogItem(e) {
+    const id = e.currentTarget.dataset.id;
+    this.setState(s => ({ month: { ...s.month, quickLog: (s.month.quickLog || []).filter(x => x.id !== id) } }));
+  }
+
+  updateFundField(e) {
+    const { fund, field } = e.currentTarget.dataset;
+    const val = parseFloat(e.target.value) || 0;
+    this.setState(s => ({ month: { ...s.month, [fund]: { ...s.month[fund], [field]: val } } }));
+  }
+
+  getContribution(m, keyword) {
+    const item = m.savings.find(x => x.name.toLowerCase().includes(keyword));
+    return item ? { amount: item.amount || 0, paused: !!item.paused } : { amount: 0, paused: false };
+  }
+
+  parseMonthKey(key) {
+    const parts = key.split(' ');
+    return new Date(parts[0] + ' 1, ' + parts[1]);
+  }
+
+  nextMonthLabel(key) {
+    const parts = key.split(' ');
+    const d = new Date(parts[0] + ' 1, ' + parts[1]);
+    d.setMonth(d.getMonth() + 1);
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  deepCopyTemplate(arr) {
+    return arr.map(x => ({ ...x, id: this.genId() }));
+  }
+
+  simulateNextMonth() {
+    if (!window.confirm('Simulate the next month? This archives ' + this.state.month.key + ' and starts a new pending month.')) return;
+    const totals = this.calcTotals(this.state.month);
+    const archiveEntry = {
+      key: this.state.month.key,
+      income: this.state.month.income,
+      trueDiscretionary: totals.trueDiscretionary,
+      leftForFreeSpending: totals.leftForFreeSpending,
+      bucketsCount: this.state.month.buckets.length,
+      bucketsFunded: this.state.month.buckets.filter(b => b.funded >= b.target).length,
+    };
+    const rolloverIn = totals.leftForFreeSpending;
+    const nextKey = this.nextMonthLabel(this.state.month.key);
+    const t = this.state.template;
+    const newMonth = {
+      key: nextKey,
+      tagline: this.state.month.tagline,
+      pending: true,
+      income: this.state.month.income,
+      rolloverIn: rolloverIn,
+      fixedExpenses: this.deepCopyTemplate(t.fixedExpenses),
+      essentials: this.deepCopyTemplate(t.essentials),
+      subscriptions: this.deepCopyTemplate(t.subscriptions),
+      savings: this.deepCopyTemplate(t.savings),
+      manualSpent: 0,
+      quickLog: [],
+      bucketTopUps: 0,
+      buckets: this.state.month.buckets.filter(b => b.funded < b.target),
+      emergencyFund: { ...this.state.month.emergencyFund },
+      hysa: { ...this.state.month.hysa },
+    };
+    this.setState(s => ({ history: [...s.history, archiveEntry], month: newMonth, completedIds: [], activeTab: 'dashboard' }));
+  }
+
+  confirmStartMonth() {
+    this.setState(s => ({ month: { ...s.month, pending: false } }));
+  }
+
+  getCompleteIds() {
+    const m = this.state.month;
+    const ids = [];
+    m.buckets.forEach(b => { if (b.target > 0 && b.funded >= b.target) ids.push('b_' + b.id); });
+    if (m.emergencyFund.target > 0 && m.emergencyFund.balance >= m.emergencyFund.target) ids.push('ef');
+    if (m.hysa.target > 0 && m.hysa.balance >= m.hysa.target) ids.push('hysa');
+    return ids;
+  }
+
+  checkWeekReset() {
+    const now = new Date();
+    const day = (now.getDay() + 6) % 7;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+    const key = monday.toDateString();
+    if (this.state.pacer.weekAnchor !== key) {
+      const totals = this.calcTotals(this.state.month);
+      const poolBeforeSpending = totals.trueDiscretionary - totals.bucketAllocTotal;
+      this.setState({
+        pacer: {
+          weekAnchor: key,
+          weekStartManualSpent: totals.manualSpent,
+          weekStartBucketTopUps: totals.bucketTopUps,
+          weekStartPoolBeforeSpending: poolBeforeSpending,
+        },
+      });
+    }
+  }
+
+  getPacerView() {
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysRemaining = Math.max(1, daysInMonth - now.getDate() + 1);
+    const weeksRemaining = daysRemaining / 7;
+    const totals = this.calcTotals(this.state.month);
+
+    // Budget structure (income, fixed, savings, essentials, subscriptions, bucket allocations)
+    // feeds live into the weekly starting allowance. Only actual spending during the week
+    // (manual spend + one-time bucket top-ups) draws down against it.
+    const poolBeforeSpending = totals.trueDiscretionary - totals.bucketAllocTotal;
+    const weeklyAllowance = Math.max(0, poolBeforeSpending / weeksRemaining);
+
+    const pacer = this.state.pacer || {};
+    const weekStartManualSpent = pacer.weekStartManualSpent != null ? pacer.weekStartManualSpent : totals.manualSpent;
+    const weekStartBucketTopUps = pacer.weekStartBucketTopUps != null ? pacer.weekStartBucketTopUps : totals.bucketTopUps;
+    const weekStartPoolBeforeSpending = pacer.weekStartPoolBeforeSpending != null ? pacer.weekStartPoolBeforeSpending : poolBeforeSpending;
+
+    const spentThisWeek = Math.max(0, (totals.manualSpent - weekStartManualSpent) + (totals.bucketTopUps - weekStartBucketTopUps));
+    const pct = weeklyAllowance > 0 ? Math.min(100, (spentThisWeek / weeklyAllowance) * 100) : (spentThisWeek > 0 ? 100 : 0);
+    const overBudget = spentThisWeek > weeklyAllowance + 0.005;
+    const structureChanged = Math.abs(poolBeforeSpending - weekStartPoolBeforeSpending) > 0.5;
+
+    const inDeficit = totals.leftForFreeSpending < -0.005;
+    let message = null, messageType = null;
+    if (inDeficit) {
+      message = 'Budget Deficit: Reduce spending. You are ' + this.fmt(totals.leftForFreeSpending) + ' in the red.';
+      messageType = 'warning';
+    } else if (overBudget) {
+      message = 'You exceeded this week\'s budget by ' + this.fmt(spentThisWeek - weeklyAllowance) + '.';
+      messageType = 'warning';
+    } else if (structureChanged) {
+      message = 'Your weekly starting allowance updated to ' + this.fmt(weeklyAllowance) + '/week based on your latest budget changes.';
+      messageType = 'info';
+    }
+    return {
+      weeklyAllowance,
+      spentThisWeek,
+      remaining: Math.max(0, weeklyAllowance - spentThisWeek),
+      pct,
+      overBudget,
+      message,
+      messageType,
+      weeksRemaining,
+    };
+  }
+
+  componentDidUpdate() {
+    this.checkWeekReset();
+    const completeNow = this.getCompleteIds();
+    const newOnes = completeNow.filter(id => !this.state.completedIds.includes(id));
+    if (newOnes.length) {
+      this.setState({ completedIds: [...this.state.completedIds, ...newOnes] });
+      const intensity = this.props.confettiIntensity === 'subtle' ? 60 : 150;
+      newOnes.forEach((id, i) => {
+        setTimeout(() => {
+          if (window.confetti) window.confetti({ particleCount: intensity, spread: 80, origin: { y: 0.6 } });
+        }, i * 1500);
+      });
+    }
+    this.syncCharts();
+  }
+
+  componentDidMount() {
+    this.checkWeekReset();
+    this.syncCharts();
+  }
+
+  syncCharts() {
+    if (!window.Chart) return;
+    const c1 = this.cashFlowChartRef.current;
+    if (c1 && this._cashFlowChartData) {
+      if (this._cashFlowChart && this._cashFlowChart.canvas !== c1) { this._cashFlowChart.destroy(); this._cashFlowChart = null; }
+      if (!this._cashFlowChart) {
+        this._cashFlowChart = new Chart(c1, {
+          type: 'doughnut',
+          data: { labels: this._cashFlowChartData.labels, datasets: [{ data: this._cashFlowChartData.values, backgroundColor: this._cashFlowChartData.colors, borderColor: '#FFFFFF', borderWidth: 2 }] },
+          options: { plugins: { legend: { display: false }, tooltip: { enabled: true } }, cutout: '62%', animation: { duration: 400 } },
+        });
+      } else {
+        this._cashFlowChart.data.labels = this._cashFlowChartData.labels;
+        this._cashFlowChart.data.datasets[0].data = this._cashFlowChartData.values;
+        this._cashFlowChart.data.datasets[0].backgroundColor = this._cashFlowChartData.colors;
+        this._cashFlowChart.update();
+      }
+    }
+    const c2 = this.discretionaryChartRef.current;
+    if (c2 && this._discChartData) {
+      if (this._discChart && this._discChart.canvas !== c2) { this._discChart.destroy(); this._discChart = null; }
+      if (!this._discChart) {
+        this._discChart = new Chart(c2, {
+          type: 'doughnut',
+          data: { labels: this._discChartData.labels, datasets: [{ data: this._discChartData.values, backgroundColor: this._discChartData.colors, borderColor: '#FFFFFF', borderWidth: 2 }] },
+          options: { plugins: { legend: { display: false }, tooltip: { enabled: true } }, cutout: '62%', animation: { duration: 400 } },
+        });
+      } else {
+        this._discChart.data.labels = this._discChartData.labels;
+        this._discChart.data.datasets[0].data = this._discChartData.values;
+        this._discChart.data.datasets[0].backgroundColor = this._discChartData.colors;
+        this._discChart.update();
+      }
+    }
+  }
+
+  buildFundColumns(m, fund, keyword, achievedColor, cremeColor) {
+    const anchor = this.parseMonthKey(m.key);
+    const contrib = this.getContribution(m, keyword);
+    const contribution = contrib.amount;
+    const paused = contrib.paused;
+    const effectiveContribution = paused ? 0 : contribution;
+    const target = fund.target || 0;
+    const balance = fund.balance || 0;
+    const progressPct = target > 0 ? Math.min(100, (balance / target) * 100) : 0;
+    const remaining = Math.max(0, target - balance);
+    const monthsToGo = effectiveContribution > 0 ? Math.max(0, Math.ceil(remaining / effectiveContribution)) : null;
+    const year = anchor.getFullYear();
+    const anchorMonthIdx = anchor.getMonth();
+    const completionDate = monthsToGo != null ? new Date(anchor.getFullYear(), anchor.getMonth() + monthsToGo, 1) : null;
+    const completionInYear = completionDate && completionDate.getFullYear() === year;
+    const offChartLabel = (completionDate && !completionInYear) ? completionDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
+    const columns = [];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(year, i, 1);
+      const label = d.toLocaleDateString('en-US', { month: 'short' });
+      const isMilestone = completionInYear && i === completionDate.getMonth();
+      const achieved = completionInYear && i >= anchorMonthIdx && i <= completionDate.getMonth();
+      columns.push({
+        label,
+        color: achieved ? achievedColor : cremeColor,
+        isMilestone,
+        labelColor: isMilestone ? achievedColor : (i < anchorMonthIdx ? '#C9B79E' : '#8A7A6B'),
+        labelWeight: isMilestone ? 700 : 400,
+        milestoneLabel: isMilestone ? (monthsToGo === 0 ? 'Complete!' : d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })) : '',
+      });
+    }
+    return { contribution: effectiveContribution, progressPct, columns, paused, offChartLabel };
+  }
+
+  renderVals() {
+    const m = this.state.month;
+    const totals = this.calcTotals(m);
+    const showCents = this.props.showCents !== false;
+
+    const tabBase = active => ({
+      border: 'none',
+      background: 'transparent',
+      fontFamily: "'Plus Jakarta Sans',sans-serif",
+      fontSize: '14.5px',
+      fontWeight: 600,
+      padding: '10px 16px',
+      cursor: 'pointer',
+      color: active ? '#E2703A' : '#8A7A6B',
+      borderBottom: active ? '2px solid #E2703A' : '2px solid transparent',
+      marginBottom: '-1px',
+    });
+    const styleToStr = obj => Object.entries(obj).map(([k, v]) => k.replace(/[A-Z]/g, c => '-' + c.toLowerCase()) + ':' + v).join(';');
+
+    const savingsWithBadge = m.savings.map(x => ({
+      ...x,
+      pausedLabel: x.paused ? 'paused' : 'active',
+      pausedBg: x.paused ? '#F5EDE3' : '#E7F3EA',
+      pausedColor: x.paused ? '#8A7A6B' : '#4F8F63',
+    }));
+
+    const bucketsView = m.buckets.map(b => {
+      const pct = b.target > 0 ? Math.min(100, (b.funded / b.target) * 100) : 0;
+      const complete = b.target > 0 && b.funded >= b.target;
+      return {
+        ...b,
+        pct,
+        fmtFunded: this.fmt(b.funded),
+        barColor: complete ? '#4F8F63' : '#E2703A',
+        statusLabel: complete ? 'Complete' : Math.round(pct) + '% funded',
+        statusColor: complete ? '#4F8F63' : '#8A7A6B',
+      };
+    });
+
+    const quickLogFeed = [...(m.quickLog || [])].sort((a, b) => b.ts - a.ts).map(x => ({
+      ...x,
+      fmtAmount: this.fmt(x.amount),
+      fmtDate: new Date(x.ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    }));
+
+    const pacer = this.getPacerView();
+    const efFund = this.buildFundColumns(m, m.emergencyFund, 'emergency', '#4F8F63', '#F5EDE3');
+    const hysaFund = this.buildFundColumns(m, m.hysa, 'hysa', '#E2703A', '#F5EDE3');
+
+    const cashFlowRows = [
+      { label: 'Fixed Expenses', value: totals.fixedTotal, color: '#6B5B4E' },
+      { label: 'Savings & Investments', value: totals.savingsTotal, color: '#4F8F63' },
+      { label: 'Essentials', value: totals.essentialsTotal, color: '#C1543A' },
+      { label: 'Subscriptions', value: totals.subsTotal, color: '#D9A066' },
+      { label: 'True Discretionary', value: Math.max(0, totals.trueDiscretionary), color: '#E2703A' },
+    ];
+    this._cashFlowChartData = {
+      labels: cashFlowRows.map(r => r.label),
+      values: cashFlowRows.map(r => r.value),
+      colors: cashFlowRows.map(r => r.color),
+    };
+    const cashFlowLegend = cashFlowRows.map(r => ({ ...r, fmtValue: this.fmt(r.value) }));
+
+    const discPalette = ['#E2703A', '#4F8F63', '#D9A066', '#C1543A', '#6B5B4E', '#B79E86', '#8A9B6E', '#D98E73'];
+    const discRows = m.buckets.map((b, i) => ({ label: b.name, value: b.monthlyAlloc || 0, color: discPalette[i % discPalette.length] }));
+    const unallocated = Math.max(0, totals.leftForFreeSpending);
+    if (unallocated > 0) discRows.push({ label: 'Unallocated (free spending)', value: unallocated, color: '#F0E4D6' });
+    this._discChartData = {
+      labels: discRows.map(r => r.label),
+      values: discRows.map(r => r.value),
+      colors: discRows.map(r => r.color),
+    };
+    const discretionaryLegend = discRows.map(r => ({ ...r, fmtValue: this.fmt(r.value) }));
+
+    const historyView = this.state.history.map(h => ({
+      ...h,
+      fmtIncome: this.fmt(h.income),
+      fmtDiscretionary: this.fmt(h.trueDiscretionary),
+      fmtLeft: this.fmt(h.leftForFreeSpending),
+      leftColor: h.leftForFreeSpending < 0 ? '#C1543A' : '#4F8F63',
+    }));
+
+    return {
+      month: { ...m, savings: savingsWithBadge, buckets: bucketsView },
+      history: historyView,
+      hasHistory: historyView.length > 0,
+      hasNoHistory: historyView.length === 0,
+      isDashboard: this.state.activeTab === 'dashboard',
+      isBuckets: this.state.activeTab === 'buckets',
+      isTimeline: this.state.activeTab === 'timeline',
+      isHistory: this.state.activeTab === 'history',
+      tabStyle_dashboard: styleToStr(tabBase(this.state.activeTab === 'dashboard')),
+      tabStyle_buckets: styleToStr(tabBase(this.state.activeTab === 'buckets')),
+      tabStyle_timeline: styleToStr(tabBase(this.state.activeTab === 'timeline')),
+      tabStyle_history: styleToStr(tabBase(this.state.activeTab === 'history')),
+      goTab: this.goTab.bind(this),
+      simulateNextMonth: this.simulateNextMonth.bind(this),
+      confirmStartMonth: this.confirmStartMonth.bind(this),
+      handleIncomeChange: this.handleIncomeChange.bind(this),
+      handleSpentChange: this.handleSpentChange.bind(this),
+      handleFieldChange: this.handleFieldChange.bind(this),
+      removeItem: this.removeItem.bind(this),
+      addItem: this.addItem.bind(this),
+      togglePaused: this.togglePaused.bind(this),
+      addBucket: this.addBucket.bind(this),
+      updateBucketName: this.updateBucketName.bind(this),
+      updateBucketAlloc: this.updateBucketAlloc.bind(this),
+      updateBucketTarget: this.updateBucketTarget.bind(this),
+      deleteBucket: this.deleteBucket.bind(this),
+      addFunds: this.addFunds.bind(this),
+      updateFundField: this.updateFundField.bind(this),
+      logExpense: this.logExpense.bind(this),
+      deleteQuickLogItem: this.deleteQuickLogItem.bind(this),
+      setQuickLogAmountRef: el => { this._quickLogAmountRef = el; },
+      setQuickLogDescRef: el => { this._quickLogDescRef = el; },
+      quickLogFeed,
+      hasQuickLog: quickLogFeed.length > 0,
+      hasNoQuickLog: quickLogFeed.length === 0,
+      fmtQuickLogTotal: this.fmt(totals.manualSpent),
+      commitOnEnter: this.commitOnEnter.bind(this),
+      fmtTrueDiscretionary: this.fmt(totals.trueDiscretionary),
+      fmtLeftForFreeSpending: this.fmt(totals.leftForFreeSpending),
+      freeSpendingColor: totals.leftForFreeSpending < 0 ? '#C1543A' : '#3A2E26',
+      fmtFixedTotal: this.fmt(totals.fixedTotal),
+      fmtSavingsTotal: this.fmt(totals.savingsTotal),
+      fmtEssentialsTotal: this.fmt(totals.essentialsTotal),
+      fmtSubsTotal: this.fmt(totals.subsTotal),
+      fmtCcSpent: this.fmt(totals.ccSpent),
+      fmtCcLeft: this.fmt(totals.trueDiscretionary),
+      fmtCcTotal: this.fmt(totals.ccPoolTotal),
+      ccLeftColor: totals.trueDiscretionary < 0 ? '#C1543A' : '#3A2E26',
+      ccBarPct: totals.ccPoolTotal > 0 ? Math.min(100, (totals.ccSpent / totals.ccPoolTotal) * 100) : 0,
+      fmtBucketAlloc: this.fmt(totals.bucketAllocTotal),
+      fmtBucketTopUps: this.fmt(m.bucketTopUps || 0),
+      showTip: this.showTip.bind(this),
+      hideTip: this.hideTip.bind(this),
+      showTipIncome: this.state.hoverTip === 'income',
+      showTipDiscretionary: this.state.hoverTip === 'discretionary',
+      showTipFree: this.state.hoverTip === 'free',
+      tipIncomeText: 'Entered manually — your total monthly take-home pay across all paychecks.',
+      tipDiscretionaryText: 'Net Income − Fixed − Savings − Essentials − Subscriptions + Rollover  =  '
+        + this.fmt(m.income) + ' − ' + this.fmt(totals.fixedTotal) + ' − ' + this.fmt(totals.savingsTotal) + ' − '
+        + this.fmt(totals.essentialsTotal) + ' − ' + this.fmt(totals.subsTotal) + ' + ' + this.fmt(totals.rolloverIn)
+        + '  =  ' + this.fmt(totals.trueDiscretionary),
+      tipFreeText: 'True Discretionary − Recurring Bucket Allocations − One-time Top-ups − Manual Spending  =  '
+        + this.fmt(totals.trueDiscretionary) + ' − ' + this.fmt(totals.bucketAllocTotal) + ' − ' + this.fmt(totals.bucketTopUps)
+        + ' − ' + this.fmt(totals.manualSpent) + '  =  ' + this.fmt(totals.leftForFreeSpending),
+      fmtEfContribution: this.fmt(efFund.contribution),
+      efColumns: efFund.columns,
+      efHasOffChart: !!efFund.offChartLabel,
+      efOffChartLabel: efFund.offChartLabel,
+      hysaColumns: hysaFund.columns,
+      hysaHasOffChart: !!hysaFund.offChartLabel,
+      hysaOffChartLabel: hysaFund.offChartLabel,
+      hysaPaused: hysaFund.paused,
+      fmtHysaStatus: hysaFund.paused ? 'paused' : ('contributing ' + this.fmt(hysaFund.contribution) + '/mo'),
+      cashFlowChartRef: this.cashFlowChartRef,
+      discretionaryChartRef: this.discretionaryChartRef,
+      cashFlowLegend: cashFlowLegend,
+      discretionaryLegend: discretionaryLegend,
+      pacerWeeksRemaining: pacer.weeksRemaining.toFixed(1),
+      fmtPacerRemaining: this.fmt(pacer.remaining),
+      fmtPacerAllowance: this.fmt(pacer.weeklyAllowance),
+      pacerColor: pacer.overBudget ? '#C1543A' : '#3A2E26',
+      pacerPct: pacer.pct,
+      pacerBarColor: pacer.overBudget ? '#C1543A' : '#4F8F63',
+      pacerHasMessage: !!pacer.message,
+      pacerMessage: pacer.message || '',
+      pacerMessageIcon: pacer.messageType === 'warning' ? '⚠️' : '📝',
+      pacerMessageBg: pacer.messageType === 'warning' ? '#FBEAE4' : '#FCEADD',
+      pacerMessageColor: pacer.messageType === 'warning' ? '#C1543A' : '#8A4B2A',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
